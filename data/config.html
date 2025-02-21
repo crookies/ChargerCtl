@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Charge Control</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Configuration</h1>
+
+        <div class="config-section">
+            <h2>Authentication</h2>
+            <label>Password</label>
+            <input type="password" id="chrg-password" placeholder="********">
+        </div>
+
+        <div class="config-section">
+            <h2>WiFi Config (leave empty to use Ethernet)</h2>
+            <label>Enable WiFi</label>
+            <input type="checkbox" id="wifi-enabled">
+            
+            <div id="wifi-config-section">
+                <label>WiFi SSID</label>
+                <input type="text" id="chrg-wifi-ssid" placeholder="WiFi SSID">
+                
+                <label>WiFi Password</label>
+                <input type="password" id="chrg-wifi-pass" placeholder="WiFi Password">
+                
+                <label>WiFi IP Address</label>
+                <input type="text" id="wifi-ip" placeholder="10.4.1.94">
+                
+                <label>WiFi IP Mask</label>
+                <input type="text" id="wifi-mask" placeholder="255.255.255.0">
+                
+                <label>WiFi IP Gateway</label>
+                <input type="text" id="wifi-gateway" placeholder="0.0.0.0">
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>Ethernet Config</h2>
+            <label>Enable Ethernet</label>
+            <input type="checkbox" id="ethernet-enabled">
+            
+            <div id="ethernet-config-section">
+                <label>IP Address</label>
+                <input type="text" id="chrg-ip" placeholder="192.168.1.100">
+                
+                <label>IP Mask</label>
+                <input type="text" id="chrg-mask" placeholder="255.255.255.0">
+                
+                <label>IP Gateway</label>
+                <input type="text" id="chrg-gateway" placeholder="192.168.1.1">
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>CerboGX</h2>
+            <label>IP Address</label>
+            <input type="text" id="cerbo-ip" placeholder="192.168.1.200">
+            
+            <label>Unit ID</label>
+            <input type="text" id="cerbo-unitid" placeholder="100">
+        </div>
+
+        <button class="save-btn" onclick="saveConfig()">Save</button>
+        <button class="back-btn" onclick="goBack()">Back</button>
+
+        <!-- Notification Panel -->
+        <div id="notification" class="notification hidden"></div>
+    </div>
+</body>
+</html>

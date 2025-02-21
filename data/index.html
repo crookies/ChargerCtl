@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charge Control</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Charge Control</h1>
+
+        <div class="status-card">
+            <h2>MultiPlus</h2>
+            <p>Status: <span id="multiplus-status">Loading...</span></p>
+            <div id="multiplus-extra" class="hidden">
+                <p>DC Out: <span id="multiplus-dc">-</span> V</p>
+                <p>Current: <span id="multiplus-current">-</span> A</p>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h2>System Charging Mode</h2>
+            <p>Mode: <span id="charging-mode">Loading...</span></p>
+        </div>
+
+        <div class="status-card" id="modbus-section">
+            <h2>Modbus</h2>
+            <p>Status: <span id="modbus-status">Loading...</span></p>
+            <p>Msg Counter: <span id="modbus-message-counter">-</span></p>
+        </div>
+
+        <button class="config-btn" onclick="goToConfig()">Configure</button>
+    </div>
+</body>
+</html>

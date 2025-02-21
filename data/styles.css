@@ -1,0 +1,135 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+/* Container */
+.container {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Titles */
+h1 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Status Cards & Config Sections */
+.status-card, .config-section {
+    background: #fff;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    text-align: left;
+}
+
+.status-card h2, .config-section h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+/* Hide extra info when inactive */
+.hidden {
+    display: none;
+}
+
+/* Modbus Error Styling */
+.error {
+    background-color: #dc3545 !important;  /* Red background */
+    color: white !important;
+}
+
+/* Form Inputs (For Config Page) */
+label {
+    display: block;
+    font-size: 14px;
+    margin-top: 10px;
+    color: #555;
+}
+
+input {
+    width: calc(100% - 22px); /* Adjust width to fit within the container */
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+/* Buttons */
+button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    font-size: 18px;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Primary Buttons */
+.config-btn, .save-btn {
+    background-color: #007bff;
+}
+
+.config-btn:hover, .save-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Secondary Buttons */
+.back-btn {
+    background-color: #6c757d;
+}
+
+.back-btn:hover {
+    background-color: #545b62;
+}
+
+/* Notification Panel */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 300px;
+    padding: 12px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.5s ease-out;
+}
+
+/* Success Message */
+.notification.success {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Error Message */
+.notification.error {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Hidden State */
+.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-out, visibility 0.5s;
+}

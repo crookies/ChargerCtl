@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Bluetooth Config</title>
+</head>
+<body>
+    <h2>ESP32 Bluetooth Configurator</h2>
+    <button onclick="connectToESP32()">Connect to ESP32</button>
+    <br><br>
+    <label>Parameter 1:</label>
+    <input type="text" id="param1" placeholder="Enter value">
+    <button onclick="sendData()">Send</button>
+    
+    <script>
+        let bluetoothDevice;
+        let gattCharacteristic;
+        const SERVICE_UUID = "5fa6622a-f571-41b6-888b-a6ca279607f8";  // Replace with your ESP32 Service UUID
+        const CHARACTERISTIC_UUID = "3f803725-56f3-42eb-b727-e2916bc74764"; // Replace with your Characteristic UUID
+ 
+        async function connectToESP32() {
+            try {
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: [SERVICE_UUID]
+                });
+
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE_UUID);
+                gattCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+                alert("Connected to ESP32!");
+            } catch (error) {
+                console.error(error);
+                alert("Connection failed!");
+            }
+        }
+
+        async function sendData() {
+            if (!gattCharacteristic) {
+                alert("Not connected to ESP32!");
+                return;
+            }
+
+            const inputValue = document.getElementById("param1").value;
+            const encoder = new TextEncoder();
+            const data = encoder.encode(inputValue);
+
+            try {
+                await gattCharacteristic.writeValue(data);
+                alert("Data sent: " + inputValue);
+            } catch (error) {
+                console.error(error);
+                alert("Failed to send data!");
+            }
+        }
+    </script>
+</body>
+</html>
