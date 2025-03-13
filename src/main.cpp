@@ -540,7 +540,7 @@ void handleData(ModbusMessage response, uint32_t token)
           DataChanged = true;
         }
     } else if (RegisterAddress == REG_MULTIPLUS_CURRENT) {
-        uint16_t IRegisterValue;
+        int16_t IRegisterValue;
         response.get(3, IRegisterValue);
         float NewVal = ((float)IRegisterValue/(float)10.0);
         if (NewVal != MultiplusCurrent) {
