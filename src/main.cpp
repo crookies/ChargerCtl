@@ -29,10 +29,10 @@ using namespace std;
 // Define the GPIO pin where the relay is connected
 #define RELAY1_PIN 14
 
-#define CHRGCTL_WIFI_ENABLED_DEFAULT  false
+#define CHRGCTL_WIFI_ENABLED_DEFAULT  true
 #define CHRGCTL_ETHERNET_ENABLED_DEFAULT  true
 
-#define CHRGCTL_WIFI_IP_ADDRESS  "10.4.1.94"
+#define CHRGCTL_WIFI_IP_ADDRESS  "172.24.24.100"
 #define CHRGCTL_WIFI_IP_MASK     "255.255.255.0"
 #define CHRGCTL_WIFI_IP_GATEWAY  "0.0.0.0"
 
@@ -48,14 +48,14 @@ const char *hostname = "CHRG_CTRL";
 #define CHRGCTRL_DEFAULT_IP_MASK    "255.255.255.0"
 #define CHRGCTRL_DEFAULT_IP_GATEWAY "0.0.0.0"
 
-#define CERBOGX_DEFAULT_IP_ADDRESS "10.4.0.5"
-#define CERBOGX_DEFAULT_UNITID     "100"
+#define CERBOGX_DEFAULT_IP_ADDRESS "172.24.24.1"
+#define CERBOGX_DEFAULT_UNITID     "227"
 
 #define HTTP_USER "admin"
 #define HTTP_PASS "admin"
 
-#define CHRGCTL_WIFI_SSID ""
-#define CHRGCTL_WIFI_PASS ""
+#define CHRGCTL_WIFI_SSID "venus-HQ2247GG3Q7-139"
+#define CHRGCTL_WIFI_PASS "pcuh8psq"
 
 // Mapping from RegisterNum (uint16_t) to key (unsigned long)
 unordered_map<uint16_t, unsigned long> registerMap;
@@ -259,11 +259,14 @@ IPAddress local_IP, gateway, subnet;
 
 void initWiFi() {
   // Connect to Wi-Fi
-  String ssid = preferences.getString("chrg_wifi_ssid", "");
-  String password = preferences.getString("chrg_wifi_pass", "");
+  String ssid = preferences.getString("chrg_wifi_ssid", CHRGCTL_WIFI_SSID);
+  String password = preferences.getString("chrg_wifi_pass", CHRGCTL_WIFI_PASS);
   IPAddress local_IP, gateway, subnet;
 
   getNetworkConfig(local_IP, gateway, subnet, true/*isWifi*/);
+
+  Serial.println("Connecting to WiFi: " + ssid);
+  Serial.println("WiFi Password: " + password);
 
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi ..");
@@ -414,6 +417,13 @@ void InitModbusClient() {
 
 }
 
+void erasePreferences() {
+  preferences.end();
+  preferences.begin("config", false);
+  preferences.clear();
+  preferences.end();
+}
+
 // Setup() - initialization happens here
 void setup() {
 // Init Serial monitor
@@ -432,6 +442,8 @@ void setup() {
   // Register the event handler
   WiFi.onEvent(ethEvent);
   
+  erasePreferences();
+
   preferences.begin("config", false);
 
   wifiEnabled = preferences.getBool("wifi_enabled", CHRGCTL_WIFI_ENABLED_DEFAULT);
@@ -457,18 +469,6 @@ void setup() {
 
 }
 
-// Define an onError handler function to receive error responses
-// Arguments are the error code returned and a user-supplied token to identify the causing request
-void handleError(Error error, uint32_t token) 
-{
-  ModbusStatus = MSTAT_ERROR;
-  if (error == LastModbusError) return;
-  // ModbusError wraps the error code and provides a readable error message for it
-  ModbusError me(error);
-  Serial.printf("Error response: %02X - %s\n", (int)me, (const char *)me);
-  LastModbusError = error;
-}
-
 // Function to associate a RegisterNum with a key
 void setRegisterKey(uint16_t registerNum, uint32_t key) {
   registerMap[registerNum] = key;
@@ -484,6 +484,22 @@ bool searchByKey(unsigned long key, uint16_t &registerNum) {
   }
   return false; // Key not found
 }
+// Define an onError handler function to receive error responses
+// Arguments are the error code returned and a user-supplied token to identify the causing request
+void handleError(Error error, uint32_t token) 
+{
+  uint16_t RegisterAddress;
+
+  ModbusStatus = MSTAT_ERROR;
+  if (error == LastModbusError) return;
+  // ModbusError wraps the error code and provides a readable error message for it
+  ModbusError me(error);
+  searchByKey(token, RegisterAddress);
+  Serial.printf("Error response: %02X - %s : Register %d\n", (int)me, (const char *)me, RegisterAddress);
+
+  LastModbusError = error;
+}
+
 
 // Define an onData handler function to receive the regular responses
 // Arguments are the message plus a user-supplied token to identify the causing request
@@ -521,6 +537,7 @@ void handleData(ModbusMessage response, uint32_t token)
         response.get(3, URegisterValue);
         if ((float)URegisterValue != SystemBatterySOC) {
           SystemBatterySOC = URegisterValue;
+          Serial.printf("State of Charge: %f\n", SystemBatterySOC);
           DataChanged = true;
         }
     } else if (RegisterAddress == REG_BATTERY_CURRENT) {
@@ -529,6 +546,7 @@ void handleData(ModbusMessage response, uint32_t token)
         float NewVal = ((float)IRegisterValue/(float)10.0);
         if (NewVal != SystemBatteryCurrent) {
           SystemBatteryCurrent = NewVal;
+          Serial.printf("System Battery Current: %f\n", SystemBatteryCurrent);
           DataChanged = true;
         }
     } else if (RegisterAddress == REG_MULTIPLUS_DC_OUT) {
@@ -537,6 +555,7 @@ void handleData(ModbusMessage response, uint32_t token)
         float NewVal = ((float)URegisterValue/(float)100.0);
         if (NewVal != MultiplusVDCOut) {
           MultiplusVDCOut = NewVal;
+          Serial.printf("Multiplus VDC Out: %f\n", MultiplusVDCOut);
           DataChanged = true;
         }
     } else if (RegisterAddress == REG_MULTIPLUS_CURRENT) {
@@ -545,6 +564,7 @@ void handleData(ModbusMessage response, uint32_t token)
         float NewVal = ((float)IRegisterValue/(float)10.0);
         if (NewVal != MultiplusCurrent) {
           MultiplusCurrent = NewVal;
+          Serial.printf("Multiplus Current: %f\n", MultiplusCurrent);
           DataChanged = true;
         }
     } else if (RegisterAddress == REG_MULTIPLUS_STATE) {
@@ -593,7 +613,8 @@ void handleData(ModbusMessage response, uint32_t token)
     }
 
     if (DataChanged) {
-      Serial.printf("Multiplus Status: %d, Charging Mode: %d", MultiplusStatus, ChargingMode);
+      
+      Serial.printf("Multiplus Status: %s, Charging Mode: %s\n",  MultiplusStatusAsString(MultiplusStatus), BatteryModeAsString(ChargingMode));
       if ((MultiplusStatus == CHARGING) && (ChargingMode == BULK)) {
         setRelayOutput(true);
         RelayIsOn = true;
